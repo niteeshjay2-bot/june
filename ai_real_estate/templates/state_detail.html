@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ state_name }} - Properties{% endblock %}
+
+{% block content %}
+<section class="state-detail-page">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('home') }}">Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{{ url_for('states_list') }}">States</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ state_name }}</span>
+        </div>
+
+        <div class="section-header">
+            <h1><i class="fas fa-map-marker-alt"></i> {{ state_name }}</h1>
+            <p>Choose a city to explore properties</p>
+        </div>
+
+        <div class="cities-grid">
+            {% for city in cities %}
+            <a href="{{ url_for('search', state=state_name, city=city) }}" class="city-card">
+                <div class="city-icon"><i class="fas fa-city"></i></div>
+                <h3>{{ city }}</h3>
+                <p>{{ city_counts.get(city, 0) }} properties</p>
+                <span class="btn btn-sm btn-primary">Explore <i class="fas fa-arrow-right"></i></span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

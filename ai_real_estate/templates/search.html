@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}Search Properties{% endblock %}
+
+{% block content %}
+<section class="search-page">
+    <div class="container">
+        <div class="search-header">
+            <h1><i class="fas fa-search"></i> Search Properties</h1>
+            <p>Find your perfect home with advanced filters</p>
+        </div>
+
+        <!-- Search Filters -->
+        <div class="search-filters">
+            <form action="{{ url_for('search') }}" method="GET" id="searchForm">
+                <div class="filter-grid">
+                    <!-- Location Filters -->
+                    <div class="filter-group">
+                        <label><i class="fas fa-map-marker-alt"></i> State</label>
+                        <select name="state" id="searchState">
+                            <option value="">All States</option>
+                            {% for state in states %}
+                            <option value="{{ state }}" {% if current_state == state %}selected{% endif %}>{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-city"></i> City</label>
+                        <select name="city" id="searchCity">
+                            <option value="">All Cities</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-home"></i> Property Type</label>
+                        <select name="property_type">
+                            <option value="">All Types</option>
+                            {% for ptype in property_types %}
+                            <option value="{{ ptype }}" {% if current_type == ptype %}selected{% endif %}>{{ ptype }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-bed"></i> BHK</label>
+                        <select name="bhk">
+                            <option value="">Any BHK</option>
+                            {% for b in [1,2,3,4,5,6] %}
+                            <option value="{{ b }}" {% if current_bhk == b %}selected{% endif %}>{{ b }} BHK</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-rupee-sign"></i> Min Price (Lakhs)</label>
+                        <input type="number" name="min_price" placeholder="Min" value="{{ current_min_price or '' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-rupee-sign"></i> Max Price (Lakhs)</label>
+                        <input type="number" name="max_price" placeholder="Max" value="{{ current_max_price or '' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-couch"></i> Furnishing</label>
+                        <select name="furnishing">
+                            <option value="">Any</option>
+                            <option value="Fully Furnished" {% if current_furnishing == 'Fully Furnished' %}selected{% endif %}>Fully Furnished</option>
+                            <option value="Semi Furnished" {% if current_furnishing == 'Semi Furnished' %}selected{% endif %}>Semi Furnished</option>
+                            <option value="Unfurnished" {% if current_furnishing == 'Unfurnished' %}selected{% endif %}>Unfurnished</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-key"></i> Possession</label>
+                        <select name="possession">
+                            <option value="">Any</option>
+                            <option value="Ready to Move" {% if current_possession == 'Ready to Move' %}selected{% endif %}>Ready to Move</option>
+                            <option value="Under Construction" {% if current_possession == 'Under Construction' %}selected{% endif %}>Under Construction</option>
+                            <option value="Upcoming" {% if current_possession == 'Upcoming' %}selected{% endif %}>Upcoming</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Amenities Filter -->
+                <div class="amenities-filter">
+                    <h3><i class="fas fa-concierge-bell"></i> Amenities</h3>
+                    <div class="amenities-grid">
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="lift" value="yes" {% if current_lift == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-elevator"></i> Lift</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="car_parking" value="yes" {% if current_car_parking == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-car"></i> Car Parking</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="swimming_pool" value="yes" {% if current_swimming_pool == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-swimming-pool"></i> Swimming Pool</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="gym" value="yes" {% if current_gym == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-dumbbell"></i> Gym</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="power_backup" value="yes" {% if current_power_backup == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-bolt"></i> Power Backup</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="security" value="yes" {% if current_security == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-shield-alt"></i> Security</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="garden" value="yes" {% if current_garden == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-tree"></i> Garden</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="club_house" value="yes" {% if current_club_house == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-glass-cheers"></i> Club House</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="pet_friendly" value="yes" {% if current_pet_friendly == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-paw"></i> Pet Friendly</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" name="vastu_compliant" value="yes" {% if current_vastu_compliant == 'yes' %}checked{% endif %}>
+                            <span><i class="fas fa-compass"></i> Vastu Compliant</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Sort and Submit -->
+                <div class="filter-actions">
+                    <div class="sort-group">
+                        <label>Sort by:</label>
+                        <select name="sort_by">
+                            <option value="relevance" {% if current_sort == 'relevance' %}selected{% endif %}>Relevance</option>
+                            <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="area_high" {% if current_sort == 'area_high' %}selected{% endif %}>Area: Largest First</option>
+                            <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Top Rated</option>
+                            <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+                        </select>
+                    </div>
+                    <div class="filter-buttons">
+                        <a href="{{ url_for('search') }}" class="btn btn-outline">Clear All</a>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results -->
+        <div class="search-results">
+            <div class="results-header">
+                <h2>{{ properties.total }} Properties Found</h2>
+            </div>
+
+            {% if properties.items %}
+            <div class="property-grid">
+                {% for prop in properties.items %}
+                <div class="property-card">
+                    <div class="property-image">
+                        <div class="property-badge">{{ prop.property_type }}</div>
+                        <div class="property-rating"><i class="fas fa-star"></i> {{ prop.rating }}</div>
+                        <div class="property-placeholder-img">
+                            <i class="fas fa-home"></i>
+                        </div>
+                    </div>
+                    <div class="property-info">
+                        <h3>{{ prop.property_name }}</h3>
+                        <p class="property-location"><i class="fas fa-map-marker-alt"></i> {{ prop.city }}, {{ prop.state }}</p>
+                        <div class="property-details">
+                            <span><i class="fas fa-bed"></i> {{ prop.bhk }} BHK</span>
+                            <span><i class="fas fa-bath"></i> {{ prop.bathrooms }} Bath</span>
+                            <span><i class="fas fa-ruler-combined"></i> {{ prop.area_sqft }} sq.ft</span>
+                        </div>
+                        <div class="property-amenities-mini">
+                            {% if prop.lift %}<span class="amenity-tag"><i class="fas fa-elevator"></i> Lift</span>{% endif %}
+                            {% if prop.car_parking %}<span class="amenity-tag"><i class="fas fa-car"></i> Parking</span>{% endif %}
+                            {% if prop.swimming_pool %}<span class="amenity-tag"><i class="fas fa-swimming-pool"></i> Pool</span>{% endif %}
+                            {% if prop.gym %}<span class="amenity-tag"><i class="fas fa-dumbbell"></i> Gym</span>{% endif %}
+                        </div>
+                        <div class="property-footer">
+                            <span class="property-price">
+                                <i class="fas fa-rupee-sign"></i>
+                                {% if prop.price_lakhs >= 100 %}
+                                {{ "%.2f"|format(prop.price_lakhs / 100) }} Cr
+                                {% else %}
+                                {{ "%.1f"|format(prop.price_lakhs) }} L
+                                {% endif %}
+                            </span>
+                            <a href="{{ url_for('property_detail', property_id=prop.property_id) }}" class="btn btn-sm btn-primary">View</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if properties.pages > 1 %}
+            <div class="pagination">
+                {% if properties.has_prev %}
+                <a href="{{ url_for('search', page=properties.prev_num, **request.args) }}" class="page-link"><i class="fas fa-chevron-left"></i></a>
+                {% endif %}
+                {% for p in properties.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if p %}
+                    <a href="{{ url_for('search', page=p, **request.args) }}" class="page-link {% if p == properties.page %}active{% endif %}">{{ p }}</a>
+                    {% else %}
+                    <span class="page-ellipsis">...</span>
+                    {% endif %}
+                {% endfor %}
+                {% if properties.has_next %}
+                <a href="{{ url_for('search', page=properties.next_num, **request.args) }}" class="page-link"><i class="fas fa-chevron-right"></i></a>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <h3>No properties found</h3>
+                <p>Try adjusting your filters or searching in a different location.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<script>
+// Dynamic city dropdown
+document.getElementById('searchState').addEventListener('change', function() {
+    var state = this.value;
+    var citySelect = document.getElementById('searchCity');
+    citySelect.innerHTML = '<option value="">All Cities</option>';
+    if (state) {
+        fetch('/api/cities/' + encodeURIComponent(state))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            data.cities.forEach(function(city) {
+                var opt = document.createElement('option');
+                opt.value = city;
+                opt.textContent = city;
+                citySelect.appendChild(opt);
+            });
+            // Re-select current city if exists
+            {% if current_city %}
+            citySelect.value = "{{ current_city }}";
+            {% endif %}
+        });
+    }
+});
+// Trigger on load if state is selected
+{% if current_state %}
+document.getElementById('searchState').dispatchEvent(new Event('change'));
+{% endif %}
+</script>
+{% endblock %}

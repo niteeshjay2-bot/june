@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1>Find Your <span class="highlight">Dream Home</span> in India</h1>
+        <p>AI-powered property search across all 36 states & union territories. Over {{ total_properties|default(19000) }}+ verified listings.</p>
+
+        <!-- Search Form -->
+        <div class="hero-search">
+            <form action="{{ url_for('search') }}" method="GET" class="search-form-hero">
+                <div class="search-row">
+                    <div class="search-field">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <select name="state" id="heroState">
+                            <option value="">Select State</option>
+                            {% for state in states %}
+                            <option value="{{ state }}">{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <i class="fas fa-city"></i>
+                        <select name="city" id="heroCity">
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <i class="fas fa-home"></i>
+                        <select name="property_type">
+                            <option value="">Property Type</option>
+                            <option value="Apartment">Apartment</option>
+                            <option value="Villa">Villa</option>
+                            <option value="Independent House">Independent House</option>
+                            <option value="Penthouse">Penthouse</option>
+                            <option value="Duplex">Duplex</option>
+                            <option value="Plot">Plot</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <i class="fas fa-rupee-sign"></i>
+                        <select name="max_price">
+                            <option value="">Budget (Max)</option>
+                            <option value="25">Under 25 Lakhs</option>
+                            <option value="50">Under 50 Lakhs</option>
+                            <option value="75">Under 75 Lakhs</option>
+                            <option value="100">Under 1 Crore</option>
+                            <option value="200">Under 2 Crore</option>
+                            <option value="500">Under 5 Crore</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-search">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-building"></i>
+                <h3>{{ total_properties|default(19000) }}+</h3>
+                <p>Properties Listed</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3>36</h3>
+                <p>States & UTs</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-city"></i>
+                <h3>{{ total_cities|default(180) }}+</h3>
+                <p>Cities Covered</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-robot"></i>
+                <h3>AI</h3>
+                <p>Powered Search</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Properties -->
+<section class="featured-section">
+    <div class="container">
+        <div class="section-header">
+            <h2><i class="fas fa-star"></i> Featured Properties</h2>
+            <p>Top-rated properties handpicked by our AI</p>
+        </div>
+        <div class="property-grid">
+            {% for prop in featured %}
+            <div class="property-card">
+                <div class="property-image">
+                    <div class="property-badge">{{ prop.property_type }}</div>
+                    <div class="property-rating"><i class="fas fa-star"></i> {{ prop.rating }}</div>
+                    <div class="property-placeholder-img">
+                        <i class="fas fa-home"></i>
+                    </div>
+                </div>
+                <div class="property-info">
+                    <h3>{{ prop.property_name }}</h3>
+                    <p class="property-location"><i class="fas fa-map-marker-alt"></i> {{ prop.city }}, {{ prop.state }}</p>
+                    <div class="property-details">
+                        <span><i class="fas fa-bed"></i> {{ prop.bhk }} BHK</span>
+                        <span><i class="fas fa-bath"></i> {{ prop.bathrooms }} Bath</span>
+                        <span><i class="fas fa-ruler-combined"></i> {{ prop.area_sqft }} sq.ft</span>
+                    </div>
+                    <div class="property-amenities-mini">
+                        {% if prop.lift %}<span class="amenity-tag"><i class="fas fa-elevator"></i> Lift</span>{% endif %}
+                        {% if prop.car_parking %}<span class="amenity-tag"><i class="fas fa-car"></i> Parking</span>{% endif %}
+                        {% if prop.swimming_pool %}<span class="amenity-tag"><i class="fas fa-swimming-pool"></i> Pool</span>{% endif %}
+                    </div>
+                    <div class="property-footer">
+                        <span class="property-price">
+                            <i class="fas fa-rupee-sign"></i>
+                            {% if prop.price_lakhs >= 100 %}
+                            {{ "%.2f"|format(prop.price_lakhs / 100) }} Cr
+                            {% else %}
+                            {{ "%.1f"|format(prop.price_lakhs) }} L
+                            {% endif %}
+                        </span>
+                        <a href="{{ url_for('property_detail', property_id=prop.property_id) }}" class="btn btn-sm btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="section-cta">
+            <a href="{{ url_for('search') }}" class="btn btn-lg btn-primary">View All Properties <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2><i class="fas fa-magic"></i> Why Choose PropAI?</h2>
+            <p>India's smartest real estate platform</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                <h3>AI Chatbot</h3>
+                <p>Our intelligent chatbot understands your needs and finds the perfect property match instantly.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-filter"></i></div>
+                <h3>Smart Filters</h3>
+                <p>Filter by amenities like lift, parking, swimming pool, gym, and 25+ more features.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+                <h3>Pan India Coverage</h3>
+                <p>Properties across all 36 states & UTs with 100+ listings in every major city.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Price Intelligence</h3>
+                <p>AI-driven price analysis and market insights to help you make informed decisions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Verified Listings</h3>
+                <p>Every property is verified with authentic details from trusted builders.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                <h3>Save & Compare</h3>
+                <p>Save your favorites and compare properties side by side to make the best choice.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Find Your Dream Home?</h2>
+            <p>Chat with our AI assistant now and get personalized property recommendations in seconds!</p>
+            <a href="{{ url_for('chatbot_page') }}" class="btn btn-lg btn-white"><i class="fas fa-robot"></i> Start AI Chat</a>
+        </div>
+    </div>
+</section>
+
+<script>
+// Dynamic city dropdown based on state selection
+document.getElementById('heroState').addEventListener('change', function() {
+    var state = this.value;
+    var citySelect = document.getElementById('heroCity');
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    if (state) {
+        fetch('/api/cities/' + encodeURIComponent(state))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            data.cities.forEach(function(city) {
+                var opt = document.createElement('option');
+                opt.value = city;
+                opt.textContent = city;
+                citySelect.appendChild(opt);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

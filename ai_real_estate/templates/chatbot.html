@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}AI Chat Assistant{% endblock %}
+
+{% block content %}
+<section class="chatbot-page">
+    <div class="container">
+        <div class="chatbot-fullpage">
+            <div class="chatbot-header">
+                <div class="chatbot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <h1>PropAI Assistant</h1>
+                    <p>Your AI-powered real estate advisor</p>
+                </div>
+            </div>
+
+            <div class="chatbot-suggestions">
+                <h3>Try asking:</h3>
+                <div class="suggestion-chips">
+                    <button class="chip" data-msg="Show me 3 BHK apartments in Mumbai">3 BHK in Mumbai</button>
+                    <button class="chip" data-msg="Properties with swimming pool in Bengaluru">Pool in Bengaluru</button>
+                    <button class="chip" data-msg="Villas under 1 crore in Goa">Villas in Goa</button>
+                    <button class="chip" data-msg="Best city for investment">Investment advice</button>
+                    <button class="chip" data-msg="Properties with lift and parking in Delhi">Lift + Parking Delhi</button>
+                    <button class="chip" data-msg="Tell me about home loans">Home Loan Info</button>
+                    <button class="chip" data-msg="Pet friendly apartments in Pune">Pet Friendly Pune</button>
+                    <button class="chip" data-msg="Vastu compliant properties in Jaipur">Vastu in Jaipur</button>
+                </div>
+            </div>
+
+            <div class="chatbot-messages" id="fullChatBody">
+                <div class="chat-message bot">
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">
+                        <strong>PropAI Assistant</strong><br>
+                        Hello! I'm your AI real estate assistant. I can help you:
+                        <ul>
+                            <li>Search properties by city, BHK, budget, and amenities</li>
+                            <li>Compare property types and cities</li>
+                            <li>Provide investment advice and market insights</li>
+                            <li>Answer questions about home loans and EMI</li>
+                            <li>Filter by amenities like lift, parking, pool, gym</li>
+                        </ul>
+                        What would you like to know?
+                    </div>
+                </div>
+            </div>
+
+            <div class="chatbot-input-area">
+                <form id="fullChatForm">
+                    <input type="text" id="fullChatInput" placeholder="Ask about properties, prices, cities, amenities..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+var chatBody = document.getElementById('fullChatBody');
+var chatForm = document.getElementById('fullChatForm');
+var chatInput = document.getElementById('fullChatInput');
+
+// Suggestion chips
+document.querySelectorAll('.chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+        chatInput.value = this.dataset.msg;
+        chatForm.dispatchEvent(new Event('submit'));
+    });
+});
+
+chatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var msg = chatInput.value.trim();
+    if (!msg) return;
+
+    // User message
+    var userDiv = document.createElement('div');
+    userDiv.className = 'chat-message user';
+    userDiv.innerHTML = '<div class="message-content">' + msg + '</div><div class="message-avatar"><i class="fas fa-user"></i></div>';
+    chatBody.appendChild(userDiv);
+
+    chatInput.value = '';
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // Loading indicator
+    var loadDiv = document.createElement('div');
+    loadDiv.className = 'chat-message bot loading';
+    loadDiv.innerHTML = '<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+    chatBody.appendChild(loadDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // API call
+    fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: msg})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        chatBody.removeChild(loadDiv);
+        var botDiv = document.createElement('div');
+        botDiv.className = 'chat-message bot';
+        var formatted = data.response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+        botDiv.innerHTML = '<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content">' + formatted + '</div>';
+        chatBody.appendChild(botDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    });
+});
+</script>
+{% endblock %}

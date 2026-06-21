@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <div class="container">
+        <div class="error-content">
+            <h1>404</h1>
+            <h2>Property Not Found!</h2>
+            <p>Looks like this page has been sold! Let's find you something better.</p>
+            <div class="error-actions">
+                <a href="{{ url_for('home') }}" class="btn btn-primary"><i class="fas fa-home"></i> Go Home</a>
+                <a href="{{ url_for('search') }}" class="btn btn-outline"><i class="fas fa-search"></i> Search Properties</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+<section class="contact-page">
+    <div class="container">
+        <div class="section-header">
+            <h1><i class="fas fa-envelope"></i> Contact Us</h1>
+            <p>Have questions? We'd love to hear from you</p>
+        </div>
+
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Our Office</h3>
+                    <p>123 Tech Park, Electronic City<br>Bengaluru, Karnataka 560100</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-phone"></i>
+                    <h3>Phone</h3>
+                    <p>+91 98765 43210<br>Mon-Sat, 9AM-7PM</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email</h3>
+                    <p>contact@propai.in<br>support@propai.in</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Working Hours</h3>
+                    <p>Monday - Saturday<br>9:00 AM - 7:00 PM IST</p>
+                </div>
+            </div>
+
+            <div class="contact-form-card">
+                <h2>Send us a Message</h2>
+                <form method="POST" action="{{ url_for('contact') }}" class="auth-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Name</label>
+                        <input type="text" name="name" placeholder="Your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" name="email" placeholder="Your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Phone (Optional)</label>
+                        <input type="tel" name="phone" placeholder="Your phone number">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-comment"></i> Message</label>
+                        <textarea name="message" rows="5" placeholder="Tell us how we can help..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-block btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

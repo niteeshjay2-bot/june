@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<section class="profile-page">
+    <div class="container">
+        <div class="profile-grid">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h2>{{ current_user.full_name }}</h2>
+                    <p>@{{ current_user.username }}</p>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <strong>{{ favorites_count }}</strong>
+                        <span>Favorites</span>
+                    </div>
+                    <div class="stat">
+                        <strong>{{ searches_count }}</strong>
+                        <span>Searches</span>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <i class="fas fa-envelope"></i>
+                        <span>{{ current_user.email }}</span>
+                    </div>
+                    {% if current_user.phone %}
+                    <div class="info-row">
+                        <i class="fas fa-phone"></i>
+                        <span>{{ current_user.phone }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <i class="fas fa-calendar"></i>
+                        <span>Joined {{ current_user.created_at.strftime('%B %Y') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-settings">
+                <div class="detail-card">
+                    <h2><i class="fas fa-edit"></i> Edit Profile</h2>
+                    <form method="POST" action="{{ url_for('auth.edit_profile') }}" class="auth-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="full_name" value="{{ current_user.full_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" name="phone" value="{{ current_user.phone or '' }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+
+                <div class="detail-card">
+                    <h2><i class="fas fa-lock"></i> Change Password</h2>
+                    <form method="POST" action="{{ url_for('auth.change_password') }}" class="auth-form">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" name="current_password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" name="new_password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" name="confirm_password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}My Favorites{% endblock %}
+
+{% block content %}
+<section class="favorites-page">
+    <div class="container">
+        <div class="section-header">
+            <h1><i class="fas fa-heart"></i> My Saved Properties</h1>
+            <p>Your favorite properties all in one place</p>
+        </div>
+
+        {% if properties %}
+        <div class="property-grid">
+            {% for prop in properties %}
+            <div class="property-card">
+                <div class="property-image">
+                    <div class="property-badge">{{ prop.property_type }}</div>
+                    <div class="property-rating"><i class="fas fa-star"></i> {{ prop.rating }}</div>
+                    <div class="property-placeholder-img"><i class="fas fa-home"></i></div>
+                </div>
+                <div class="property-info">
+                    <h3>{{ prop.property_name }}</h3>
+                    <p class="property-location"><i class="fas fa-map-marker-alt"></i> {{ prop.city }}, {{ prop.state }}</p>
+                    <div class="property-details">
+                        <span><i class="fas fa-bed"></i> {{ prop.bhk }} BHK</span>
+                        <span><i class="fas fa-bath"></i> {{ prop.bathrooms }} Bath</span>
+                        <span><i class="fas fa-ruler-combined"></i> {{ prop.area_sqft }} sq.ft</span>
+                    </div>
+                    <div class="property-footer">
+                        <span class="property-price"><i class="fas fa-rupee-sign"></i>
+                            {% if prop.price_lakhs >= 100 %}{{ "%.2f"|format(prop.price_lakhs / 100) }} Cr{% else %}{{ "%.1f"|format(prop.price_lakhs) }} L{% endif %}
+                        </span>
+                        <a href="{{ url_for('property_detail', property_id=prop.property_id) }}" class="btn btn-sm btn-primary">View</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-results">
+            <i class="fas fa-heart"></i>
+            <h3>No saved properties yet</h3>
+            <p>Start exploring and save properties you love!</p>
+            <a href="{{ url_for('search') }}" class="btn btn-primary">Browse Properties</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
