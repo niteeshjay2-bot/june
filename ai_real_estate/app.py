@@ -394,10 +394,9 @@ def create_app():
                 bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
 
                 # Format response for HTML display
-                formatted_response = bot_response.replace('**', '<strong>').replace('\n', '<br>')
-                # Fix unclosed strong tags
                 import re
-                formatted_response = re.sub(r'<strong>(.*?)<strong>', r'<strong>\1</strong>', formatted_response)
+                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', bot_response)
+                formatted_response = formatted_response.replace('\n', '<br>')
 
                 chat_history.append({'role': 'user', 'content': user_message})
                 chat_history.append({'role': 'bot', 'content': formatted_response})
