@@ -267,28 +267,43 @@ def create_app():
     @app.route('/api/chat', methods=['POST'])
     def chat():
         """AI Chatbot API endpoint"""
-        data = request.get_json()
-        user_message = data.get('message', '').strip()
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({'response': 'Please type a message to get started!'})
 
-        if not user_message:
-            return jsonify({'response': 'Please type a message to get started!'})
+            user_message = data.get('message', '').strip()
 
-        # Get chatbot response
-        user_id = current_user.id if current_user.is_authenticated else None
-        bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
+            if not user_message:
+                return jsonify({'response': 'Please type a message to get started!'})
 
-        # Save chat history if user is logged in
-        if current_user.is_authenticated:
-            from models import ChatMessage
-            chat_msg = ChatMessage(
-                user_id=current_user.id,
-                message=user_message,
-                response=bot_response
-            )
-            db.session.add(chat_msg)
-            db.session.commit()
+            # Get chatbot response
+            try:
+                user_id = current_user.id if current_user.is_authenticated else None
+            except Exception:
+                user_id = None
 
-        return jsonify({'response': bot_response})
+            bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
+
+            # Save chat history if user is logged in
+            try:
+                if current_user.is_authenticated:
+                    from models import ChatMessage
+                    chat_msg = ChatMessage(
+                        user_id=current_user.id,
+                        message=user_message,
+                        response=bot_response
+                    )
+                    db.session.add(chat_msg)
+                    db.session.commit()
+            except Exception:
+                pass  # Don't fail if saving history fails
+
+            return jsonify({'response': bot_response})
+
+        except Exception as e:
+            print(f"[CHATBOT ERROR] {str(e)}")
+            return jsonify({'response': "I apologize, but I encountered an issue processing your message. Could you please try rephrasing? You can ask me about properties, prices, investments, or home loans!"})
 
     @app.route('/api/favorite/<int:property_id>', methods=['POST'])
     @login_required

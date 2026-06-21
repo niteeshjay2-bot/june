@@ -97,7 +97,10 @@ chatForm.addEventListener('submit', function(e) {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({message: msg})
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        if (!r.ok) { throw new Error('Server error'); }
+        return r.json();
+    })
     .then(function(data) {
         chatBody.removeChild(loadDiv);
         var botDiv = document.createElement('div');
@@ -105,6 +108,14 @@ chatForm.addEventListener('submit', function(e) {
         var formatted = data.response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         botDiv.innerHTML = '<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content">' + formatted + '</div>';
         chatBody.appendChild(botDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    })
+    .catch(function(err) {
+        chatBody.removeChild(loadDiv);
+        var errDiv = document.createElement('div');
+        errDiv.className = 'chat-message bot';
+        errDiv.innerHTML = '<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content">Sorry, I encountered an error. Please try again or rephrase your question!</div>';
+        chatBody.appendChild(errDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
     });
 });
