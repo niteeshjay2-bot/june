@@ -623,11 +623,23 @@ img {
 
 .property-image {
     position: relative;
-    height: 180px;
+    height: 200px;
     background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+}
+
+.property-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.property-card:hover .property-img {
+    transform: scale(1.08);
 }
 
 .property-placeholder-img {
@@ -1172,8 +1184,15 @@ img {
 .detail-main-image {
     border-radius: var(--radius-lg);
     overflow: hidden;
-    height: 300px;
+    height: 350px;
     background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+}
+
+.detail-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
 }
 
 .image-placeholder {

@@ -102,9 +102,7 @@
                 <div class="property-image">
                     <div class="property-badge">{{ prop.property_type }}</div>
                     <div class="property-rating"><i class="fas fa-star"></i> {{ prop.rating }}</div>
-                    <div class="property-placeholder-img">
-                        <i class="fas fa-home"></i>
-                    </div>
+                    <img src="{{ get_property_image(prop.property_type, prop.property_id) }}" alt="{{ prop.property_name }}" class="property-img" loading="lazy">
                 </div>
                 <div class="property-info">
                     <h3>{{ prop.property_name }}</h3>
