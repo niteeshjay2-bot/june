@@ -1781,3 +1781,212 @@ h1, h2, h3, h4, h5, h6 {
    ========================================== */
 ::selection { background: rgba(26, 86, 219, 0.12); color: var(--primary-dark); }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+
+/* ==========================================
+   DASHBOARDS - Buyer & Seller
+   ========================================== */
+.dashboard-page { padding: 44px 0 80px; }
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.dashboard-header h1 {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    color: var(--dark);
+}
+
+.dashboard-header h1 i { color: var(--primary); margin-right: 8px; }
+.dashboard-header p { color: var(--gray-500); font-size: 0.9rem; margin-top: 4px; }
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.dash-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+    box-shadow: var(--shadow-xs);
+}
+
+.dash-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dash-stat-icon i { font-size: 1.2rem; }
+.dash-stat-card h3 { font-size: 1.5rem; font-weight: 800; color: var(--dark); letter-spacing: -0.03em; }
+.dash-stat-card p { font-size: 0.78rem; color: var(--gray-500); font-weight: 500; }
+
+.dashboard-section {
+    margin-bottom: 40px;
+}
+
+.dashboard-section h2 {
+    font-size: 1.2rem;
+    color: var(--dark);
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.dashboard-section h2 i { color: var(--primary); margin-right: 8px; }
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--gray-200);
+}
+
+.empty-state i { font-size: 3rem; color: var(--gray-300); margin-bottom: 14px; }
+.empty-state h3 { font-size: 1.1rem; color: var(--gray-700); margin-bottom: 6px; }
+.empty-state p { color: var(--gray-500); font-size: 0.88rem; margin-bottom: 18px; }
+
+/* Search History */
+.search-history-list { display: flex; flex-direction: column; gap: 10px; }
+
+.search-history-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+}
+
+.search-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--primary-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.search-icon i { color: var(--primary); font-size: 0.8rem; }
+.search-details { flex: 1; }
+.search-details strong { font-size: 0.88rem; color: var(--dark); display: block; }
+.search-details small { color: var(--gray-500); font-size: 0.78rem; }
+
+/* Listings Table */
+.listings-table {
+    overflow-x: auto;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+}
+
+.listings-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.listings-table th {
+    text-align: left;
+    padding: 14px 16px;
+    background: var(--gray-50);
+    color: var(--gray-600);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.listings-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--gray-50);
+    color: var(--gray-700);
+}
+
+.listings-table tr:hover td { background: var(--gray-50); }
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.status-active { background: #ecfdf5; color: #059669; }
+.status-sold { background: #fef3c7; color: #d97706; }
+.status-inactive { background: #f1f5f9; color: #64748b; }
+
+/* Form Page */
+.form-page {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--white);
+    padding: 36px;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--gray-100);
+    box-shadow: var(--shadow-card);
+}
+
+.form-page h1 {
+    font-size: 1.4rem;
+    color: var(--dark);
+    margin-bottom: 28px;
+}
+
+.form-page h1 i { color: var(--primary); margin-right: 8px; }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.form-actions-bottom {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.listing-form select, .listing-form input, .listing-form textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.listing-form select:focus, .listing-form input:focus, .listing-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.06);
+}

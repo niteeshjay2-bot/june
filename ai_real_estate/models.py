@@ -24,11 +24,13 @@ class User(UserMixin, db.Model):
     profile_pic = db.Column(db.String(256), default='default_avatar.png')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
+    role = db.Column(db.String(20), default='buyer')  # 'buyer' or 'seller'
 
     # Relationships
     favorites = db.relationship('Favorite', backref='user', lazy=True, cascade='all, delete-orphan')
     searches = db.relationship('SearchHistory', backref='user', lazy=True, cascade='all, delete-orphan')
     chat_messages = db.relationship('ChatMessage', backref='user', lazy=True, cascade='all, delete-orphan')
+    listings = db.relationship('SellerListing', backref='seller', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
         """Hash and set the user password"""
@@ -155,3 +157,42 @@ class ContactInquiry(db.Model):
     property_id = db.Column(db.Integer, db.ForeignKey('properties.id'), nullable=True)
     message = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+
+class SellerListing(db.Model):
+    """Seller's property listings"""
+    __tablename__ = 'seller_listings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    property_type = db.Column(db.String(50), nullable=False)
+    state = db.Column(db.String(100), nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+    locality = db.Column(db.String(200), nullable=True)
+    price_lakhs = db.Column(db.Float, nullable=False)
+    area_sqft = db.Column(db.Integer, nullable=False)
+    bhk = db.Column(db.Integer, nullable=False)
+    bathrooms = db.Column(db.Integer, default=1)
+    floor = db.Column(db.Integer, default=0)
+    total_floors = db.Column(db.Integer, default=1)
+    facing = db.Column(db.String(20), nullable=True)
+    furnishing = db.Column(db.String(30), nullable=True)
+    possession = db.Column(db.String(30), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    amenities = db.Column(db.Text, nullable=True)  # comma separated
+    contact_phone = db.Column(db.String(15), nullable=True)
+    status = db.Column(db.String(20), default='active')  # active, sold, inactive
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    views_count = db.Column(db.Integer, default=0)
+    inquiries_count = db.Column(db.Integer, default=0)
+
+    def get_price_formatted(self):
+        if self.price_lakhs >= 100:
+            return f"{self.price_lakhs / 100:.2f} Cr"
+        return f"{self.price_lakhs:.1f} L"
+
+    def __repr__(self):
+        return f'<SellerListing {self.title} - {self.city}>'

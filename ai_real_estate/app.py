@@ -365,6 +365,158 @@ def create_app():
 
         return render_template('contact.html')
 
+    # ==================== BUYER DASHBOARD ====================
+
+    @app.route('/buyer/dashboard')
+    @login_required
+    def buyer_dashboard():
+        """Buyer dashboard - saved properties, searches, inquiries"""
+        from models import Favorite, SearchHistory, ChatMessage, ContactInquiry
+
+        # Get stats
+        favorites_count = Favorite.query.filter_by(user_id=current_user.id).count()
+        searches_count = SearchHistory.query.filter_by(user_id=current_user.id).count()
+        inquiries_count = ContactInquiry.query.filter_by(email=current_user.email).count()
+        chat_count = ChatMessage.query.filter_by(user_id=current_user.id).count()
+
+        # Get saved properties
+        favs = Favorite.query.filter_by(user_id=current_user.id).all()
+        property_ids = [f.property_id for f in favs]
+        favorites = Property.query.filter(Property.id.in_(property_ids)).limit(6).all() if property_ids else []
+
+        # Get recent searches
+        recent_searches = SearchHistory.query.filter_by(user_id=current_user.id)\
+            .order_by(SearchHistory.created_at.desc()).limit(10).all()
+
+        return render_template('buyer_dashboard.html',
+                               favorites_count=favorites_count,
+                               searches_count=searches_count,
+                               inquiries_count=inquiries_count,
+                               chat_count=chat_count,
+                               favorites=favorites,
+                               recent_searches=recent_searches)
+
+    # ==================== SELLER DASHBOARD ====================
+
+    @app.route('/seller/dashboard')
+    @login_required
+    def seller_dashboard():
+        """Seller dashboard - manage listings"""
+        from models import SellerListing
+
+        listings = SellerListing.query.filter_by(seller_id=current_user.id)\
+            .order_by(SellerListing.created_at.desc()).all()
+
+        total_listings = len(listings)
+        active_listings = sum(1 for l in listings if l.status == 'active')
+        total_views = sum(l.views_count for l in listings)
+        total_inquiries = sum(l.inquiries_count for l in listings)
+
+        return render_template('seller_dashboard.html',
+                               listings=listings,
+                               total_listings=total_listings,
+                               active_listings=active_listings,
+                               total_views=total_views,
+                               total_inquiries=total_inquiries)
+
+    @app.route('/seller/listing/add', methods=['GET', 'POST'])
+    @login_required
+    def seller_add_listing():
+        """Add new property listing"""
+        from models import SellerListing
+
+        if request.method == 'POST':
+            title = request.form.get('title', '').strip()
+            property_type = request.form.get('property_type', '').strip()
+            state = request.form.get('state', '').strip()
+            city = request.form.get('city', '').strip()
+            price_lakhs = request.form.get('price_lakhs', type=float)
+            area_sqft = request.form.get('area_sqft', type=int)
+            bhk = request.form.get('bhk', type=int)
+
+            if not all([title, property_type, state, city, price_lakhs, area_sqft, bhk]):
+                flash('Please fill in all required fields.', 'error')
+                return render_template('seller_add_listing.html',
+                                       editing=False, listing=None,
+                                       states=sorted(STATES_CITIES.keys()))
+
+            listing = SellerListing(
+                seller_id=current_user.id,
+                title=title,
+                property_type=property_type,
+                state=state,
+                city=city,
+                locality=request.form.get('locality', '').strip(),
+                price_lakhs=price_lakhs,
+                area_sqft=area_sqft,
+                bhk=bhk,
+                bathrooms=request.form.get('bathrooms', 1, type=int),
+                floor=request.form.get('floor', 0, type=int),
+                total_floors=request.form.get('total_floors', 1, type=int),
+                facing=request.form.get('facing', '').strip(),
+                furnishing=request.form.get('furnishing', '').strip(),
+                possession=request.form.get('possession', '').strip(),
+                description=request.form.get('description', '').strip(),
+                amenities=request.form.get('amenities', '').strip(),
+                contact_phone=request.form.get('contact_phone', '').strip(),
+            )
+
+            db.session.add(listing)
+            db.session.commit()
+            flash('Property listing published successfully!', 'success')
+            return redirect(url_for('seller_dashboard'))
+
+        return render_template('seller_add_listing.html',
+                               editing=False, listing=None,
+                               states=sorted(STATES_CITIES.keys()))
+
+    @app.route('/seller/listing/edit/<int:listing_id>', methods=['GET', 'POST'])
+    @login_required
+    def seller_edit_listing(listing_id):
+        """Edit an existing listing"""
+        from models import SellerListing
+
+        listing = SellerListing.query.filter_by(id=listing_id, seller_id=current_user.id).first_or_404()
+
+        if request.method == 'POST':
+            listing.title = request.form.get('title', '').strip()
+            listing.property_type = request.form.get('property_type', '').strip()
+            listing.state = request.form.get('state', '').strip()
+            listing.city = request.form.get('city', '').strip()
+            listing.locality = request.form.get('locality', '').strip()
+            listing.price_lakhs = request.form.get('price_lakhs', type=float)
+            listing.area_sqft = request.form.get('area_sqft', type=int)
+            listing.bhk = request.form.get('bhk', type=int)
+            listing.bathrooms = request.form.get('bathrooms', 1, type=int)
+            listing.floor = request.form.get('floor', 0, type=int)
+            listing.total_floors = request.form.get('total_floors', 1, type=int)
+            listing.facing = request.form.get('facing', '').strip()
+            listing.furnishing = request.form.get('furnishing', '').strip()
+            listing.possession = request.form.get('possession', '').strip()
+            listing.description = request.form.get('description', '').strip()
+            listing.amenities = request.form.get('amenities', '').strip()
+            listing.contact_phone = request.form.get('contact_phone', '').strip()
+
+            db.session.commit()
+            flash('Listing updated successfully!', 'success')
+            return redirect(url_for('seller_dashboard'))
+
+        return render_template('seller_add_listing.html',
+                               editing=True, listing=listing,
+                               states=sorted(STATES_CITIES.keys()))
+
+    @app.route('/seller/listing/delete/<int:listing_id>', methods=['POST'])
+    @login_required
+    def seller_delete_listing(listing_id):
+        """Delete a listing"""
+        from models import SellerListing
+
+        listing = SellerListing.query.filter_by(id=listing_id, seller_id=current_user.id).first_or_404()
+        db.session.delete(listing)
+        db.session.commit()
+        flash('Listing deleted.', 'info')
+        return redirect(url_for('seller_dashboard'))
+
     @app.route('/about')
     def about():
         """About page"""

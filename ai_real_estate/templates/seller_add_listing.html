@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}{% if editing %}Edit{% else %}Add{% endif %} Listing{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('seller_dashboard') }}">Dashboard</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{% if editing %}Edit{% else %}Add New{% endif %} Listing</span>
+        </div>
+
+        <div class="form-page">
+            <h1><i class="fas fa-{% if editing %}edit{% else %}plus-circle{% endif %}"></i> {% if editing %}Edit{% else %}Add New{% endif %} Property Listing</h1>
+
+            <form method="POST" class="auth-form listing-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-heading"></i> Property Title</label>
+                        <input type="text" name="title" placeholder="e.g. Green Valley Apartments" value="{{ listing.title if editing else '' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-home"></i> Property Type</label>
+                        <select name="property_type" required>
+                            <option value="">Select Type</option>
+                            {% for ptype in ['Apartment', 'Villa', 'Independent House', 'Penthouse', 'Studio Apartment', 'Duplex', 'Row House', 'Farmhouse', 'Builder Floor', 'Plot'] %}
+                            <option value="{{ ptype }}" {% if editing and listing.property_type == ptype %}selected{% endif %}>{{ ptype }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> State</label>
+                        <select name="state" required>
+                            <option value="">Select State</option>
+                            {% for state in states %}
+                            <option value="{{ state }}" {% if editing and listing.state == state %}selected{% endif %}>{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-city"></i> City</label>
+                        <input type="text" name="city" placeholder="Enter city name" value="{{ listing.city if editing else '' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-map"></i> Locality</label>
+                        <input type="text" name="locality" placeholder="e.g. Whitefield, Sector 5" value="{{ listing.locality if editing else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-rupee-sign"></i> Price (in Lakhs)</label>
+                        <input type="number" step="0.1" name="price_lakhs" placeholder="e.g. 45.5" value="{{ listing.price_lakhs if editing else '' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-ruler-combined"></i> Area (sq.ft)</label>
+                        <input type="number" name="area_sqft" placeholder="e.g. 1200" value="{{ listing.area_sqft if editing else '' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-bed"></i> BHK</label>
+                        <select name="bhk" required>
+                            {% for b in range(1, 7) %}
+                            <option value="{{ b }}" {% if editing and listing.bhk == b %}selected{% endif %}>{{ b }} BHK</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-bath"></i> Bathrooms</label>
+                        <select name="bathrooms">
+                            {% for b in range(1, 6) %}
+                            <option value="{{ b }}" {% if editing and listing.bathrooms == b %}selected{% endif %}>{{ b }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-layer-group"></i> Floor</label>
+                        <input type="number" name="floor" placeholder="e.g. 3" value="{{ listing.floor if editing else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> Total Floors</label>
+                        <input type="number" name="total_floors" placeholder="e.g. 12" value="{{ listing.total_floors if editing else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-compass"></i> Facing</label>
+                        <select name="facing">
+                            <option value="">Select</option>
+                            {% for f in ['North', 'South', 'East', 'West', 'North-East', 'North-West', 'South-East', 'South-West'] %}
+                            <option value="{{ f }}" {% if editing and listing.facing == f %}selected{% endif %}>{{ f }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-couch"></i> Furnishing</label>
+                        <select name="furnishing">
+                            <option value="">Select</option>
+                            {% for f in ['Fully Furnished', 'Semi Furnished', 'Unfurnished'] %}
+                            <option value="{{ f }}" {% if editing and listing.furnishing == f %}selected{% endif %}>{{ f }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-key"></i> Possession</label>
+                        <select name="possession">
+                            <option value="">Select</option>
+                            {% for p in ['Ready to Move', 'Under Construction', 'Upcoming'] %}
+                            <option value="{{ p }}" {% if editing and listing.possession == p %}selected{% endif %}>{{ p }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Contact Phone</label>
+                        <input type="tel" name="contact_phone" placeholder="Your contact number" value="{{ listing.contact_phone if editing else '' }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Description</label>
+                    <textarea name="description" rows="4" placeholder="Describe your property - location advantages, nearby landmarks, special features...">{{ listing.description if editing else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-concierge-bell"></i> Amenities (comma separated)</label>
+                    <input type="text" name="amenities" placeholder="e.g. Lift, Car Parking, Swimming Pool, Gym, Security" value="{{ listing.amenities if editing else '' }}">
+                </div>
+
+                <div class="form-actions-bottom">
+                    <a href="{{ url_for('seller_dashboard') }}" class="btn btn-outline">Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if editing %}Update{% else %}Publish{% endif %} Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

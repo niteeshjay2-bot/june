@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Buyer Dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+    <div class="container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-shopping-bag"></i> Buyer Dashboard</h1>
+                <p>Track your property search journey</p>
+            </div>
+            <a href="{{ url_for('search') }}" class="btn btn-primary"><i class="fas fa-search"></i> Search Properties</a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-stats">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #fce7f3;"><i class="fas fa-heart" style="color: #db2777;"></i></div>
+                <div>
+                    <h3>{{ favorites_count }}</h3>
+                    <p>Saved Properties</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #eff6ff;"><i class="fas fa-search" style="color: #1a56db;"></i></div>
+                <div>
+                    <h3>{{ searches_count }}</h3>
+                    <p>Searches Made</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #ecfdf5;"><i class="fas fa-envelope" style="color: #059669;"></i></div>
+                <div>
+                    <h3>{{ inquiries_count }}</h3>
+                    <p>Inquiries Sent</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: #fef3c7;"><i class="fas fa-robot" style="color: #d97706;"></i></div>
+                <div>
+                    <h3>{{ chat_count }}</h3>
+                    <p>AI Chats</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Properties -->
+        <div class="dashboard-section">
+            <h2><i class="fas fa-heart"></i> Saved Properties</h2>
+            {% if favorites %}
+            <div class="property-grid">
+                {% for prop in favorites %}
+                <div class="property-card">
+                    <div class="property-image">
+                        <div class="property-badge">{{ prop.property_type }}</div>
+                        <img src="{{ get_property_image(prop.property_type, prop.property_id) }}" alt="{{ prop.property_name }}" class="property-img" loading="lazy">
+                    </div>
+                    <div class="property-info">
+                        <h3>{{ prop.property_name }}</h3>
+                        <p class="property-location"><i class="fas fa-map-marker-alt"></i> {{ prop.city }}, {{ prop.state }}</p>
+                        <div class="property-details">
+                            <span><i class="fas fa-bed"></i> {{ prop.bhk }} BHK</span>
+                            <span><i class="fas fa-ruler-combined"></i> {{ prop.area_sqft }} sq.ft</span>
+                        </div>
+                        <div class="property-footer">
+                            <span class="property-price"><i class="fas fa-rupee-sign"></i>
+                                {% if prop.price_lakhs >= 100 %}{{ "%.2f"|format(prop.price_lakhs / 100) }} Cr{% else %}{{ "%.1f"|format(prop.price_lakhs) }} L{% endif %}
+                            </span>
+                            <a href="{{ url_for('property_detail', property_id=prop.property_id) }}" class="btn btn-sm btn-primary">View</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-heart"></i>
+                <h3>No saved properties</h3>
+                <p>Browse and save properties you're interested in!</p>
+                <a href="{{ url_for('search') }}" class="btn btn-primary"><i class="fas fa-search"></i> Browse</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Searches -->
+        <div class="dashboard-section">
+            <h2><i class="fas fa-history"></i> Recent Searches</h2>
+            {% if recent_searches %}
+            <div class="search-history-list">
+                {% for s in recent_searches %}
+                <div class="search-history-item">
+                    <div class="search-icon"><i class="fas fa-search"></i></div>
+                    <div class="search-details">
+                        <strong>
+                            {% if s.city %}{{ s.city }}{% elif s.state %}{{ s.state }}{% else %}All India{% endif %}
+                            {% if s.property_type %} • {{ s.property_type }}{% endif %}
+                            {% if s.bhk %} • {{ s.bhk }} BHK{% endif %}
+                        </strong>
+                        <small>
+                            {% if s.min_price %}From Rs. {{ s.min_price }}L{% endif %}
+                            {% if s.max_price %} to Rs. {{ s.max_price }}L{% endif %}
+                            • {{ s.created_at.strftime('%d %b %Y') }}
+                        </small>
+                    </div>
+                    <a href="{{ url_for('search', state=s.state or '', city=s.city or '', property_type=s.property_type or '', bhk=s.bhk or '') }}" class="btn btn-sm btn-outline">Search Again</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No search history</h3>
+                <p>Your searches will appear here for quick access.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
