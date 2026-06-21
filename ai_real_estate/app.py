@@ -274,7 +274,8 @@ def create_app():
             return jsonify({'response': 'Please type a message to get started!'})
 
         # Get chatbot response
-        bot_response = chatbot.get_response(user_message, db_session=db.session)
+        user_id = current_user.id if current_user.is_authenticated else None
+        bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
 
         # Save chat history if user is logged in
         if current_user.is_authenticated:
@@ -444,7 +445,7 @@ def create_app():
 
         return {
             'states_list': sorted(STATES_CITIES.keys()),
-            'app_name': 'PropAI India',
+            'app_name': 'INFY Nest AI',
             'app_tagline': 'AI-Powered Real Estate Platform',
             'get_property_image': get_property_image,
         }
