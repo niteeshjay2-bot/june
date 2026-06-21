@@ -27,6 +27,11 @@
                         <label><i class="fas fa-city"></i> City</label>
                         <select name="city" id="searchCity">
                             <option value="">All Cities</option>
+                            {% if current_state and states_cities.get(current_state) %}
+                            {% for city in states_cities[current_state] %}
+                            <option value="{{ city }}" {% if current_city == city %}selected{% endif %}>{{ city }}</option>
+                            {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
                     <div class="filter-group">
@@ -217,32 +222,4 @@
     </div>
 </section>
 
-<script>
-// Dynamic city dropdown
-document.getElementById('searchState').addEventListener('change', function() {
-    var state = this.value;
-    var citySelect = document.getElementById('searchCity');
-    citySelect.innerHTML = '<option value="">All Cities</option>';
-    if (state) {
-        fetch('/api/cities/' + encodeURIComponent(state))
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            data.cities.forEach(function(city) {
-                var opt = document.createElement('option');
-                opt.value = city;
-                opt.textContent = city;
-                citySelect.appendChild(opt);
-            });
-            // Re-select current city if exists
-            {% if current_city %}
-            citySelect.value = "{{ current_city }}";
-            {% endif %}
-        });
-    }
-});
-// Trigger on load if state is selected
-{% if current_state %}
-document.getElementById('searchState').dispatchEvent(new Event('change'));
-{% endif %}
-</script>
 {% endblock %}

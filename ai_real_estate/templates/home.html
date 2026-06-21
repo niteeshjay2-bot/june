@@ -191,24 +191,4 @@
     </div>
 </section>
 
-<script>
-// Dynamic city dropdown based on state selection
-document.getElementById('heroState').addEventListener('change', function() {
-    var state = this.value;
-    var citySelect = document.getElementById('heroCity');
-    citySelect.innerHTML = '<option value="">Select City</option>';
-    if (state) {
-        fetch('/api/cities/' + encodeURIComponent(state))
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            data.cities.forEach(function(city) {
-                var opt = document.createElement('option');
-                opt.value = city;
-                opt.textContent = city;
-                citySelect.appendChild(opt);
-            });
-        });
-    }
-});
-</script>
 {% endblock %}

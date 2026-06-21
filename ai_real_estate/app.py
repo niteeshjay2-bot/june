@@ -6,7 +6,7 @@ authentication, and comprehensive Indian property listings.
 
 import os
 import json
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_required, current_user
 from models import db, User, Property, Favorite, SearchHistory, ContactInquiry
 from auth import auth_bp
@@ -308,7 +308,7 @@ def create_app():
     @app.route('/api/favorite/<int:property_id>', methods=['POST'])
     @login_required
     def toggle_favorite(property_id):
-        """Toggle property as favorite"""
+        """Toggle property as favorite (form POST - no JS)"""
         prop = Property.query.filter_by(property_id=property_id).first_or_404()
 
         existing = Favorite.query.filter_by(
@@ -319,12 +319,14 @@ def create_app():
         if existing:
             db.session.delete(existing)
             db.session.commit()
-            return jsonify({'status': 'removed', 'message': 'Removed from favorites'})
+            flash('Removed from favorites.', 'info')
         else:
             fav = Favorite(user_id=current_user.id, property_id=prop.id)
             db.session.add(fav)
             db.session.commit()
-            return jsonify({'status': 'added', 'message': 'Added to favorites'})
+            flash('Added to favorites!', 'success')
+
+        return redirect(url_for('property_detail', property_id=property_id))
 
     @app.route('/favorites')
     @login_required
@@ -368,10 +370,99 @@ def create_app():
         """About page"""
         return render_template('about.html')
 
-    @app.route('/chatbot')
+    @app.route('/chatbot', methods=['GET', 'POST'])
     def chatbot_page():
-        """Chatbot full page"""
-        return render_template('chatbot.html')
+        """Chatbot full page - pure Python, no JavaScript"""
+
+        # Initialize chat history in session
+        if 'chat_history' not in session:
+            session['chat_history'] = []
+
+        chat_history = session['chat_history']
+        prefill_message = ''
+
+        # Handle suggestion chip clicks (GET with query param)
+        if request.method == 'GET' and request.args.get('message'):
+            user_message = request.args.get('message', '').strip()
+            if user_message:
+                # Get bot response
+                try:
+                    user_id = current_user.id if current_user.is_authenticated else None
+                except Exception:
+                    user_id = None
+
+                bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
+
+                # Format response for HTML display
+                formatted_response = bot_response.replace('**', '<strong>').replace('\n', '<br>')
+                # Fix unclosed strong tags
+                import re
+                formatted_response = re.sub(r'<strong>(.*?)<strong>', r'<strong>\1</strong>', formatted_response)
+
+                chat_history.append({'role': 'user', 'content': user_message})
+                chat_history.append({'role': 'bot', 'content': formatted_response})
+
+                # Keep only last 20 messages
+                if len(chat_history) > 20:
+                    chat_history = chat_history[-20:]
+
+                session['chat_history'] = chat_history
+
+        # Handle form POST
+        if request.method == 'POST':
+            user_message = request.form.get('message', '').strip()
+            if user_message:
+                # Get bot response
+                try:
+                    user_id = current_user.id if current_user.is_authenticated else None
+                except Exception:
+                    user_id = None
+
+                try:
+                    bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
+                except Exception as e:
+                    bot_response = "I apologize, I encountered an issue. Please try rephrasing your question!"
+
+                # Format response for HTML display
+                formatted_response = bot_response.replace('\n', '<br>')
+                # Handle **bold** markdown
+                import re
+                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', formatted_response)
+
+                chat_history.append({'role': 'user', 'content': user_message})
+                chat_history.append({'role': 'bot', 'content': formatted_response})
+
+                # Keep only last 20 messages
+                if len(chat_history) > 20:
+                    chat_history = chat_history[-20:]
+
+                session['chat_history'] = chat_history
+
+                # Save to DB if logged in
+                try:
+                    if current_user.is_authenticated:
+                        from models import ChatMessage
+                        chat_msg = ChatMessage(
+                            user_id=current_user.id,
+                            message=user_message,
+                            response=bot_response
+                        )
+                        db.session.add(chat_msg)
+                        db.session.commit()
+                except Exception:
+                    pass
+
+            return redirect(url_for('chatbot_page'))
+
+        return render_template('chatbot.html',
+                               chat_history=chat_history,
+                               prefill_message=prefill_message)
+
+    @app.route('/chatbot/clear')
+    def chatbot_clear():
+        """Clear chat history"""
+        session.pop('chat_history', None)
+        return redirect(url_for('chatbot_page'))
 
     # ==================== ERROR HANDLERS ====================
 

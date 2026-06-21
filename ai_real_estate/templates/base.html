@@ -30,10 +30,10 @@
                 {% if current_user.is_authenticated %}
                 <a href="{{ url_for('favorites') }}" class="nav-link fav-link"><i class="fas fa-heart"></i></a>
                 <div class="user-dropdown">
-                    <button class="user-btn">
+                    <a href="#" class="user-btn">
                         <i class="fas fa-user-circle"></i> {{ current_user.full_name.split()[0] }}
                         <i class="fas fa-chevron-down"></i>
-                    </button>
+                    </a>
                     <div class="dropdown-menu">
                         <a href="{{ url_for('auth.profile') }}"><i class="fas fa-user"></i> Profile</a>
                         <a href="{{ url_for('favorites') }}"><i class="fas fa-heart"></i> Favorites</a>
@@ -46,10 +46,6 @@
                 <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Register</a>
                 {% endif %}
             </div>
-
-            <button class="nav-toggle" id="navToggle">
-                <i class="fas fa-bars"></i>
-            </button>
         </div>
     </nav>
 
@@ -61,7 +57,6 @@
         <div class="flash-message flash-{{ category }}">
             <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
             <span>{{ message }}</span>
-            <button class="flash-close">&times;</button>
         </div>
         {% endfor %}
     </div>
@@ -116,119 +111,9 @@
         </div>
     </footer>
 
-    <!-- Chatbot Widget -->
-    <div class="chatbot-widget" id="chatWidget">
-        <button class="chat-toggle" id="chatToggle">
-            <i class="fas fa-robot"></i>
-        </button>
-        <div class="chat-window" id="chatWindow">
-            <div class="chat-header">
-                <h4><i class="fas fa-robot"></i> INFY Nest Assistant</h4>
-                <button class="chat-close" id="chatClose">&times;</button>
-            </div>
-            <div class="chat-body" id="chatBody">
-                <div class="chat-message bot">
-                    <div class="message-content">
-                        Hello! 👋 I'm your INFY Nest AI assistant. Ask me about properties, prices, cities, amenities, home loans, or investment advice — I understand natural language!
-                    </div>
-                </div>
-            </div>
-            <div class="chat-input">
-                <form id="chatForm">
-                    <input type="text" id="chatInput" placeholder="Ask about properties..." autocomplete="off">
-                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Inline Python-friendly scripting (no separate JS files) -->
-    <script>
-    // Navigation toggle
-    document.getElementById('navToggle').addEventListener('click', function() {
-        document.querySelector('.nav-menu').classList.toggle('active');
-    });
-
-    // Flash message close
-    document.querySelectorAll('.flash-close').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            this.parentElement.style.display = 'none';
-        });
-    });
-
-    // Auto-hide flash messages
-    setTimeout(function() {
-        document.querySelectorAll('.flash-message').forEach(function(msg) {
-            msg.style.opacity = '0';
-            setTimeout(function() { msg.style.display = 'none'; }, 300);
-        });
-    }, 5000);
-
-    // Chatbot widget
-    var chatToggle = document.getElementById('chatToggle');
-    var chatWindow = document.getElementById('chatWindow');
-    var chatClose = document.getElementById('chatClose');
-    var chatForm = document.getElementById('chatForm');
-    var chatInput = document.getElementById('chatInput');
-    var chatBody = document.getElementById('chatBody');
-
-    chatToggle.addEventListener('click', function() {
-        chatWindow.classList.toggle('active');
-    });
-
-    chatClose.addEventListener('click', function() {
-        chatWindow.classList.remove('active');
-    });
-
-    chatForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var msg = chatInput.value.trim();
-        if (!msg) return;
-
-        // Add user message
-        var userDiv = document.createElement('div');
-        userDiv.className = 'chat-message user';
-        userDiv.innerHTML = '<div class="message-content">' + msg + '</div>';
-        chatBody.appendChild(userDiv);
-
-        chatInput.value = '';
-        chatBody.scrollTop = chatBody.scrollHeight;
-
-        // Send to API
-        fetch('/api/chat', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message: msg})
-        })
-        .then(function(r) {
-            if (!r.ok) { throw new Error('Server error'); }
-            return r.json();
-        })
-        .then(function(data) {
-            var botDiv = document.createElement('div');
-            botDiv.className = 'chat-message bot';
-            var formatted = data.response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-            botDiv.innerHTML = '<div class="message-content">' + formatted + '</div>';
-            chatBody.appendChild(botDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        })
-        .catch(function(err) {
-            var errDiv = document.createElement('div');
-            errDiv.className = 'chat-message bot';
-            errDiv.innerHTML = '<div class="message-content">Sorry, something went wrong. Please try again!</div>';
-            chatBody.appendChild(errDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        });
-    });
-
-    // User dropdown
-    var userBtn = document.querySelector('.user-btn');
-    if (userBtn) {
-        userBtn.addEventListener('click', function() {
-            this.parentElement.querySelector('.dropdown-menu').classList.toggle('active');
-        });
-    }
-    </script>
-    {% block extra_js %}{% endblock %}
+    <!-- Floating Chat Link (no JS - just a link to chat page) -->
+    <a href="{{ url_for('chatbot_page') }}" class="chat-fab" title="Chat with AI">
+        <i class="fas fa-robot"></i>
+    </a>
 </body>
 </html>

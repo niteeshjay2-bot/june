@@ -15,109 +15,56 @@
                 </div>
             </div>
 
+            <!-- Suggestion Links (pure HTML - no JS) -->
             <div class="chatbot-suggestions">
-                <h3>Try asking:</h3>
+                <h3>Quick questions:</h3>
                 <div class="suggestion-chips">
-                    <button class="chip" data-msg="Show me 3 BHK apartments in Mumbai">3 BHK in Mumbai</button>
-                    <button class="chip" data-msg="Properties with swimming pool in Bengaluru">Pool in Bengaluru</button>
-                    <button class="chip" data-msg="Villas under 1 crore in Goa">Villas in Goa</button>
-                    <button class="chip" data-msg="Best city for investment">Investment advice</button>
-                    <button class="chip" data-msg="Properties with lift and parking in Delhi">Lift + Parking Delhi</button>
-                    <button class="chip" data-msg="Tell me about home loans">Home Loan Info</button>
-                    <button class="chip" data-msg="Pet friendly apartments in Pune">Pet Friendly Pune</button>
-                    <button class="chip" data-msg="Vastu compliant properties in Jaipur">Vastu in Jaipur</button>
+                    <a href="{{ url_for('chatbot_page', message='Show me 3 BHK apartments in Mumbai') }}" class="chip">3 BHK in Mumbai</a>
+                    <a href="{{ url_for('chatbot_page', message='Properties with swimming pool in Bengaluru') }}" class="chip">Pool in Bengaluru</a>
+                    <a href="{{ url_for('chatbot_page', message='Villas under 1 crore in Goa') }}" class="chip">Villas in Goa</a>
+                    <a href="{{ url_for('chatbot_page', message='Best city for investment') }}" class="chip">Investment advice</a>
+                    <a href="{{ url_for('chatbot_page', message='Tell me about home loans') }}" class="chip">Home Loan Info</a>
+                    <a href="{{ url_for('chatbot_page', message='Pet friendly apartments in Pune') }}" class="chip">Pet Friendly Pune</a>
+                    <a href="{{ url_for('chatbot_page', message='Compare apartment vs villa') }}" class="chip">Apartment vs Villa</a>
+                    <a href="{{ url_for('chatbot_page', message='help') }}" class="chip">What can you do?</a>
                 </div>
             </div>
 
-            <div class="chatbot-messages" id="fullChatBody">
+            <!-- Chat Messages (rendered server-side) -->
+            <div class="chatbot-messages">
+                {% if not chat_history %}
                 <div class="chat-message bot">
                     <div class="message-avatar"><i class="fas fa-robot"></i></div>
                     <div class="message-content">
-                        <strong>INFY Nest Assistant</strong><br>
-                        Hello! 👋 I'm your INFY Nest AI assistant — powered by intelligent NLP to understand natural language. I can help you:
-                        <ul>
-                            <li>Search properties by city, BHK, budget, and amenities</li>
-                            <li>Remember your preferences across our conversation</li>
-                            <li>Provide investment advice and market insights</li>
-                            <li>Answer questions about home loans and EMI</li>
-                            <li>Compare cities, property types, and more</li>
-                        </ul>
-                        Just chat naturally — like you'd talk to a real estate expert! What are you looking for today?
+                        <strong>INFY Nest Assistant</strong><br><br>
+                        Hello! 👋 I'm your INFY Nest AI assistant. I can help you:<br><br>
+                        • Search properties by city, BHK, budget, and amenities<br>
+                        • Provide investment advice and market insights<br>
+                        • Answer questions about home loans and EMI<br>
+                        • Compare cities, property types, and more<br><br>
+                        Just type your question below and press Send!
                     </div>
                 </div>
+                {% else %}
+                {% for msg in chat_history %}
+                <div class="chat-message {{ msg.role }}">
+                    <div class="message-avatar">
+                        <i class="fas {% if msg.role == 'bot' %}fa-robot{% else %}fa-user{% endif %}"></i>
+                    </div>
+                    <div class="message-content">{{ msg.content|safe }}</div>
+                </div>
+                {% endfor %}
+                {% endif %}
             </div>
 
+            <!-- Chat Input Form (pure HTML form POST - no JS) -->
             <div class="chatbot-input-area">
-                <form id="fullChatForm">
-                    <input type="text" id="fullChatInput" placeholder="Ask about properties, prices, cities, amenities..." autocomplete="off">
+                <form method="POST" action="{{ url_for('chatbot_page') }}">
+                    <input type="text" name="message" placeholder="Ask about properties, prices, cities, amenities..." autocomplete="off" autofocus value="{{ prefill_message or '' }}">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send</button>
                 </form>
             </div>
         </div>
     </div>
 </section>
-
-<script>
-var chatBody = document.getElementById('fullChatBody');
-var chatForm = document.getElementById('fullChatForm');
-var chatInput = document.getElementById('fullChatInput');
-
-// Suggestion chips
-document.querySelectorAll('.chip').forEach(function(chip) {
-    chip.addEventListener('click', function() {
-        chatInput.value = this.dataset.msg;
-        chatForm.dispatchEvent(new Event('submit'));
-    });
-});
-
-chatForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    var msg = chatInput.value.trim();
-    if (!msg) return;
-
-    // User message
-    var userDiv = document.createElement('div');
-    userDiv.className = 'chat-message user';
-    userDiv.innerHTML = '<div class="message-content">' + msg + '</div><div class="message-avatar"><i class="fas fa-user"></i></div>';
-    chatBody.appendChild(userDiv);
-
-    chatInput.value = '';
-    chatBody.scrollTop = chatBody.scrollHeight;
-
-    // Loading indicator
-    var loadDiv = document.createElement('div');
-    loadDiv.className = 'chat-message bot loading';
-    loadDiv.innerHTML = '<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
-    chatBody.appendChild(loadDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-
-    // API call
-    fetch('/api/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({message: msg})
-    })
-    .then(function(r) {
-        if (!r.ok) { throw new Error('Server error'); }
-        return r.json();
-    })
-    .then(function(data) {
-        chatBody.removeChild(loadDiv);
-        var botDiv = document.createElement('div');
-        botDiv.className = 'chat-message bot';
-        var formatted = data.response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-        botDiv.innerHTML = '<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content">' + formatted + '</div>';
-        chatBody.appendChild(botDiv);
-        chatBody.scrollTop = chatBody.scrollHeight;
-    })
-    .catch(function(err) {
-        chatBody.removeChild(loadDiv);
-        var errDiv = document.createElement('div');
-        errDiv.className = 'chat-message bot';
-        errDiv.innerHTML = '<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content">Sorry, I encountered an error. Please try again or rephrase your question!</div>';
-        chatBody.appendChild(errDiv);
-        chatBody.scrollTop = chatBody.scrollHeight;
-    });
-});
-</script>
 {% endblock %}

@@ -113,9 +113,11 @@
                 <!-- Action Buttons -->
                 <div class="detail-card action-card">
                     {% if current_user.is_authenticated %}
-                    <button class="btn btn-block btn-favorite {% if is_favorited %}favorited{% endif %}" id="favBtn" data-id="{{ property.property_id }}">
-                        <i class="fas fa-heart"></i> {% if is_favorited %}Saved{% else %}Save Property{% endif %}
-                    </button>
+                    <form method="POST" action="{{ url_for('toggle_favorite', property_id=property.property_id) }}">
+                        <button type="submit" class="btn btn-block btn-favorite {% if is_favorited %}favorited{% endif %}">
+                            <i class="fas fa-heart"></i> {% if is_favorited %}Saved{% else %}Save Property{% endif %}
+                        </button>
+                    </form>
                     {% else %}
                     <a href="{{ url_for('auth.login') }}" class="btn btn-block btn-outline">
                         <i class="fas fa-heart"></i> Login to Save
@@ -192,24 +194,4 @@
     </div>
 </section>
 
-<script>
-// Favorite toggle
-var favBtn = document.getElementById('favBtn');
-if (favBtn) {
-    favBtn.addEventListener('click', function() {
-        var propId = this.dataset.id;
-        fetch('/api/favorite/' + propId, {method: 'POST'})
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.status === 'added') {
-                favBtn.classList.add('favorited');
-                favBtn.innerHTML = '<i class="fas fa-heart"></i> Saved';
-            } else {
-                favBtn.classList.remove('favorited');
-                favBtn.innerHTML = '<i class="fas fa-heart"></i> Save Property';
-            }
-        });
-    });
-}
-</script>
 {% endblock %}
