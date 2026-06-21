@@ -1990,3 +1990,10 @@ h1, h2, h3, h4, h5, h6 {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.06);
 }
+
+
+
+/* Admin role badges */
+.status-buyer { background: #eff6ff; color: #1a56db; }
+.status-seller { background: #ecfdf5; color: #059669; }
+.status-admin { background: #fef2f2; color: #dc2626; }

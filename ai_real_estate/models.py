@@ -24,7 +24,7 @@ class User(UserMixin, db.Model):
     profile_pic = db.Column(db.String(256), default='default_avatar.png')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
-    role = db.Column(db.String(20), default='buyer')  # 'buyer' or 'seller'
+    role = db.Column(db.String(20), default='buyer')  # 'buyer', 'seller', or 'admin'
 
     # Relationships
     favorites = db.relationship('Favorite', backref='user', lazy=True, cascade='all, delete-orphan')

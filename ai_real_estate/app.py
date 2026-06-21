@@ -517,6 +517,126 @@ def create_app():
         flash('Listing deleted.', 'info')
         return redirect(url_for('seller_dashboard'))
 
+    # ==================== ADMIN DASHBOARD ====================
+
+    def admin_required(f):
+        """Decorator to restrict access to admin users only"""
+        from functools import wraps
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated or current_user.role != 'admin':
+                flash('Access denied. Admin privileges required.', 'error')
+                return redirect(url_for('home'))
+            return f(*args, **kwargs)
+        return decorated_function
+
+    @app.route('/admin')
+    @login_required
+    def admin_dashboard():
+        """Admin dashboard - manage everything"""
+        if current_user.role != 'admin':
+            flash('Access denied. Admin privileges required.', 'error')
+            return redirect(url_for('home'))
+
+        from models import SellerListing, ContactInquiry
+
+        total_users = User.query.count()
+        total_properties = Property.query.count()
+        total_listings = SellerListing.query.count()
+        total_inquiries = ContactInquiry.query.count()
+
+        users = User.query.order_by(User.created_at.desc()).all()
+        listings = SellerListing.query.order_by(SellerListing.created_at.desc()).limit(20).all()
+        inquiries = ContactInquiry.query.order_by(ContactInquiry.created_at.desc()).limit(20).all()
+
+        return render_template('admin_dashboard.html',
+                               total_users=total_users,
+                               total_properties=total_properties,
+                               total_listings=total_listings,
+                               total_inquiries=total_inquiries,
+                               users=users,
+                               listings=listings,
+                               inquiries=inquiries)
+
+    @app.route('/admin/user/<int:user_id>/role', methods=['POST'])
+    @login_required
+    def admin_change_role(user_id):
+        """Change user role"""
+        if current_user.role != 'admin':
+            flash('Access denied.', 'error')
+            return redirect(url_for('home'))
+
+        user = User.query.get_or_404(user_id)
+        new_role = request.form.get('role', 'buyer')
+        if new_role in ['buyer', 'seller', 'admin']:
+            user.role = new_role
+            db.session.commit()
+            flash(f'{user.full_name} role changed to {new_role}.', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    @app.route('/admin/user/<int:user_id>/toggle', methods=['POST'])
+    @login_required
+    def admin_toggle_user(user_id):
+        """Enable/disable user"""
+        if current_user.role != 'admin':
+            flash('Access denied.', 'error')
+            return redirect(url_for('home'))
+
+        user = User.query.get_or_404(user_id)
+        user.is_active = not user.is_active
+        db.session.commit()
+        status = 'enabled' if user.is_active else 'disabled'
+        flash(f'{user.full_name} account {status}.', 'info')
+        return redirect(url_for('admin_dashboard'))
+
+    @app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+    @login_required
+    def admin_delete_user(user_id):
+        """Delete user"""
+        if current_user.role != 'admin':
+            flash('Access denied.', 'error')
+            return redirect(url_for('home'))
+
+        user = User.query.get_or_404(user_id)
+        if user.id == current_user.id:
+            flash('Cannot delete yourself.', 'error')
+            return redirect(url_for('admin_dashboard'))
+
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'User {user.full_name} deleted.', 'info')
+        return redirect(url_for('admin_dashboard'))
+
+    @app.route('/admin/listing/<int:listing_id>/delete', methods=['POST'])
+    @login_required
+    def admin_delete_listing(listing_id):
+        """Admin delete any listing"""
+        if current_user.role != 'admin':
+            flash('Access denied.', 'error')
+            return redirect(url_for('home'))
+
+        from models import SellerListing
+        listing = SellerListing.query.get_or_404(listing_id)
+        db.session.delete(listing)
+        db.session.commit()
+        flash('Listing removed.', 'info')
+        return redirect(url_for('admin_dashboard'))
+
+    @app.route('/admin/inquiry/<int:inquiry_id>/delete', methods=['POST'])
+    @login_required
+    def admin_delete_inquiry(inquiry_id):
+        """Delete inquiry"""
+        if current_user.role != 'admin':
+            flash('Access denied.', 'error')
+            return redirect(url_for('home'))
+
+        from models import ContactInquiry
+        inquiry = ContactInquiry.query.get_or_404(inquiry_id)
+        db.session.delete(inquiry)
+        db.session.commit()
+        flash('Inquiry deleted.', 'info')
+        return redirect(url_for('admin_dashboard'))
+
     @app.route('/about')
     def about():
         """About page"""
