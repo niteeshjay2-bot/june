@@ -34,7 +34,7 @@ def validate_password(password):
 def login():
     """User login page"""
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('home'))
 
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
@@ -60,7 +60,7 @@ def login():
             next_page = request.args.get('next')
             if next_page:
                 return redirect(next_page)
-            return redirect(url_for('main.home'))
+            return redirect(url_for('home'))
         else:
             flash('Invalid email or password. Please try again.', 'error')
 
@@ -71,7 +71,7 @@ def login():
 def register():
     """User registration page"""
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('home'))
 
     if request.method == 'POST':
         full_name = request.form.get('full_name', '').strip()
@@ -138,7 +138,7 @@ def logout():
     """Log out the current user"""
     logout_user()
     flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('main.home'))
+    return redirect(url_for('home'))
 
 
 @auth_bp.route('/profile')
