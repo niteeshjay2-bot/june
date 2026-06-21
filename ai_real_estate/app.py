@@ -373,39 +373,11 @@ def create_app():
     @app.route('/chatbot', methods=['GET', 'POST'])
     def chatbot_page():
         """Chatbot full page - pure Python, no JavaScript"""
+        import re
 
         # Initialize chat history in session
         if 'chat_history' not in session:
             session['chat_history'] = []
-
-        chat_history = session['chat_history']
-        prefill_message = ''
-
-        # Handle suggestion chip clicks (GET with query param)
-        if request.method == 'GET' and request.args.get('message'):
-            user_message = request.args.get('message', '').strip()
-            if user_message:
-                # Get bot response
-                try:
-                    user_id = current_user.id if current_user.is_authenticated else None
-                except Exception:
-                    user_id = None
-
-                bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
-
-                # Format response for HTML display
-                import re
-                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', bot_response)
-                formatted_response = formatted_response.replace('\n', '<br>')
-
-                chat_history.append({'role': 'user', 'content': user_message})
-                chat_history.append({'role': 'bot', 'content': formatted_response})
-
-                # Keep only last 20 messages
-                if len(chat_history) > 20:
-                    chat_history = chat_history[-20:]
-
-                session['chat_history'] = chat_history
 
         # Handle form POST
         if request.method == 'POST':
@@ -423,19 +395,20 @@ def create_app():
                     bot_response = "I apologize, I encountered an issue. Please try rephrasing your question!"
 
                 # Format response for HTML display
-                formatted_response = bot_response.replace('\n', '<br>')
-                # Handle **bold** markdown
-                import re
-                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', formatted_response)
+                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', bot_response)
+                formatted_response = formatted_response.replace('\n', '<br>')
 
-                chat_history.append({'role': 'user', 'content': user_message})
-                chat_history.append({'role': 'bot', 'content': formatted_response})
+                # Get current history, append, save back
+                history = list(session.get('chat_history', []))
+                history.append({'role': 'user', 'content': user_message})
+                history.append({'role': 'bot', 'content': formatted_response})
 
                 # Keep only last 20 messages
-                if len(chat_history) > 20:
-                    chat_history = chat_history[-20:]
+                if len(history) > 20:
+                    history = history[-20:]
 
-                session['chat_history'] = chat_history
+                session['chat_history'] = history
+                session.modified = True
 
                 # Save to DB if logged in
                 try:
@@ -453,9 +426,39 @@ def create_app():
 
             return redirect(url_for('chatbot_page'))
 
+        # Handle suggestion chip clicks (GET with query param)
+        if request.args.get('message'):
+            user_message = request.args.get('message', '').strip()
+            if user_message:
+                try:
+                    user_id = current_user.id if current_user.is_authenticated else None
+                except Exception:
+                    user_id = None
+
+                try:
+                    bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
+                except Exception:
+                    bot_response = "I apologize, I encountered an issue. Please try rephrasing your question!"
+
+                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', bot_response)
+                formatted_response = formatted_response.replace('\n', '<br>')
+
+                history = list(session.get('chat_history', []))
+                history.append({'role': 'user', 'content': user_message})
+                history.append({'role': 'bot', 'content': formatted_response})
+
+                if len(history) > 20:
+                    history = history[-20:]
+
+                session['chat_history'] = history
+                session.modified = True
+
+                return redirect(url_for('chatbot_page'))
+
+        chat_history = session.get('chat_history', [])
         return render_template('chatbot.html',
                                chat_history=chat_history,
-                               prefill_message=prefill_message)
+                               prefill_message='')
 
     @app.route('/chatbot/clear')
     def chatbot_clear():
