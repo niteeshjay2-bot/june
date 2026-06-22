@@ -753,75 +753,25 @@ def create_app():
     @app.context_processor
     def inject_globals():
         """Inject global variables into all templates"""
-        # Curated property images from Unsplash (free to use)
-        property_images = {
-            'Apartment': [
-                'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=250&fit=crop',
-            ],
-            'Villa': [
-                'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&h=250&fit=crop',
-            ],
-            'Independent House': [
-                'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1576941089067-2de3c901e126?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1598228723793-52759bba239c?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=400&h=250&fit=crop',
-            ],
-            'Penthouse': [
-                'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=400&h=250&fit=crop',
-            ],
-            'Studio Apartment': [
-                'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400&h=250&fit=crop',
-            ],
-            'Duplex': [
-                'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600585153490-76fb20a32601?w=400&h=250&fit=crop',
-            ],
-            'Row House': [
-                'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=400&h=250&fit=crop',
-            ],
-            'Farmhouse': [
-                'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1605146769289-440113cc3d00?w=400&h=250&fit=crop',
-            ],
-            'Builder Floor': [
-                'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=400&h=250&fit=crop',
-            ],
-            'Plot': [
-                'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?w=400&h=250&fit=crop',
-                'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&h=250&fit=crop',
-            ],
+        # Local property images (no external URLs)
+        property_image_map = {
+            'Apartment': 'apartment',
+            'Villa': 'villa',
+            'Independent House': 'house',
+            'Penthouse': 'penthouse',
+            'Studio Apartment': 'studio',
+            'Duplex': 'duplex',
+            'Row House': 'rowhouse',
+            'Farmhouse': 'farmhouse',
+            'Builder Floor': 'builder',
+            'Plot': 'plot',
         }
 
         def get_property_image(property_type, property_id):
-            """Get a consistent image for a property based on its type and ID"""
-            images = property_images.get(property_type, property_images['Apartment'])
-            return images[property_id % len(images)]
+            """Get local image path for a property"""
+            key = property_image_map.get(property_type, 'apartment')
+            img_num = (property_id % 8) + 1
+            return url_for('static', filename=f'images/properties/{key}_{img_num}.png')
 
         return {
             'states_list': sorted(STATES_CITIES.keys()),
