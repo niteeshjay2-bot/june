@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}AI Price Prediction{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+    <div class="container">
+        <div class="section-header">
+            <h1><i class="fas fa-brain"></i> AI Price Prediction</h1>
+            <p>Get accurate property price estimates powered by our AI model trained on 19,891 real listings</p>
+        </div>
+
+        <div class="predict-layout">
+            <!-- Prediction Form -->
+            <div class="predict-form-card">
+                <h2><i class="fas fa-calculator"></i> Enter Property Details</h2>
+                <form method="POST" action="{{ url_for('predict_price') }}" class="auth-form listing-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> State *</label>
+                            <select name="state" required>
+                                <option value="">Select State</option>
+                                {% for state in states %}
+                                <option value="{{ state }}" {% if form_data and form_data.state == state %}selected{% endif %}>{{ state }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-city"></i> City *</label>
+                            <input type="text" name="city" placeholder="Enter city name" value="{{ form_data.city if form_data else '' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-home"></i> Property Type *</label>
+                            <select name="property_type" required>
+                                <option value="">Select Type</option>
+                                {% for ptype in ['Apartment', 'Villa', 'Independent House', 'Penthouse', 'Studio Apartment', 'Duplex', 'Row House', 'Farmhouse', 'Builder Floor', 'Plot'] %}
+                                <option value="{{ ptype }}" {% if form_data and form_data.property_type == ptype %}selected{% endif %}>{{ ptype }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-ruler-combined"></i> Area (sq.ft) *</label>
+                            <input type="number" name="area_sqft" placeholder="e.g. 1200" value="{{ form_data.area_sqft if form_data else '' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-bed"></i> BHK *</label>
+                            <select name="bhk" required>
+                                {% for b in [1,2,3,4,5,6] %}
+                                <option value="{{ b }}" {% if form_data and form_data.bhk == b|string %}selected{% endif %}>{{ b }} BHK</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-layer-group"></i> Floor</label>
+                            <input type="number" name="floor" placeholder="e.g. 5" value="{{ form_data.floor if form_data else '0' }}">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-building"></i> Total Floors</label>
+                            <input type="number" name="total_floors" placeholder="e.g. 15" value="{{ form_data.total_floors if form_data else '1' }}">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-couch"></i> Furnishing</label>
+                            <select name="furnishing">
+                                {% for f in ['Unfurnished', 'Semi Furnished', 'Fully Furnished'] %}
+                                <option value="{{ f }}" {% if form_data and form_data.furnishing == f %}selected{% endif %}>{{ f }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-key"></i> Possession</label>
+                            <select name="possession">
+                                {% for p in ['Ready to Move', 'Under Construction', 'Upcoming'] %}
+                                <option value="{{ p }}" {% if form_data and form_data.possession == p %}selected{% endif %}>{{ p }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Age (years)</label>
+                            <input type="number" name="age_years" placeholder="0" value="{{ form_data.age_years if form_data else '0' }}">
+                        </div>
+                    </div>
+
+                    <!-- Amenities -->
+                    <div class="form-group">
+                        <label><i class="fas fa-concierge-bell"></i> Amenities</label>
+                        <div class="amenities-grid" style="margin-top:8px;">
+                            {% for amenity in ['Lift', 'Car Parking', 'Swimming Pool', 'Gym', 'Power Backup', 'Security Guard', 'Garden', 'Club House', 'Pet Friendly', 'Vastu Compliant', 'Modular Kitchen', 'Solar Panel'] %}
+                            <label class="amenity-checkbox">
+                                <input type="checkbox" name="amenities" value="{{ amenity }}" {% if form_data and amenity in form_data.amenities %}checked{% endif %}>
+                                <span>{{ amenity }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-lg btn-primary" style="margin-top:16px;">
+                        <i class="fas fa-brain"></i> Predict Price
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results -->
+            {% if prediction %}
+            <div class="predict-results">
+                <div class="predict-result-card">
+                    <div class="predict-price-main">
+                        <h2>Predicted Price</h2>
+                        <div class="predicted-amount">{{ prediction.predicted_price_formatted }}</div>
+                        <div class="predict-range">
+                            <span>Range: {{ prediction.price_low_formatted }} — {{ prediction.price_high_formatted }}</span>
+                        </div>
+                        <div class="predict-ppsf">
+                            <i class="fas fa-ruler"></i> Rs. {{ prediction.price_per_sqft|int }}/sq.ft
+                        </div>
+                        <div class="predict-confidence">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: {{ prediction.confidence }}%"></div>
+                            </div>
+                            <span>{{ prediction.confidence }}% Confidence</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Breakdown -->
+                <div class="predict-breakdown-card">
+                    <h3><i class="fas fa-chart-bar"></i> Price Breakdown</h3>
+                    <div class="breakdown-list">
+                        {% for key, value in prediction.breakdown.items() %}
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">{{ key.replace('_', ' ')|capitalize }}</span>
+                            <span class="breakdown-value">{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Market Insight -->
+                <div class="predict-insight-card">
+                    <h3><i class="fas fa-lightbulb"></i> Market Insight</h3>
+                    <p>{{ prediction.market_insight }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

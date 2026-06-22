@@ -10,10 +10,10 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_login import LoginManager, login_required, current_user
 from models import db, User, Property, Favorite, SearchHistory, ContactInquiry
 from auth import auth_bp
-from chatbot import ChatBot
+from price_predictor import PricePredictor
 
-# Initialize chatbot
-chatbot = ChatBot()
+# Initialize price predictor
+predictor = PricePredictor()
 
 
 def create_app():
@@ -263,47 +263,6 @@ def create_app():
         """API to get cities for a given state (for dynamic dropdowns)"""
         cities = STATES_CITIES.get(state, [])
         return jsonify({'cities': sorted(cities)})
-
-    @app.route('/api/chat', methods=['POST'])
-    def chat():
-        """AI Chatbot API endpoint"""
-        try:
-            data = request.get_json()
-            if not data:
-                return jsonify({'response': 'Please type a message to get started!'})
-
-            user_message = data.get('message', '').strip()
-
-            if not user_message:
-                return jsonify({'response': 'Please type a message to get started!'})
-
-            # Get chatbot response
-            try:
-                user_id = current_user.id if current_user.is_authenticated else None
-            except Exception:
-                user_id = None
-
-            bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
-
-            # Save chat history if user is logged in
-            try:
-                if current_user.is_authenticated:
-                    from models import ChatMessage
-                    chat_msg = ChatMessage(
-                        user_id=current_user.id,
-                        message=user_message,
-                        response=bot_response
-                    )
-                    db.session.add(chat_msg)
-                    db.session.commit()
-            except Exception:
-                pass  # Don't fail if saving history fails
-
-            return jsonify({'response': bot_response})
-
-        except Exception as e:
-            print(f"[CHATBOT ERROR] {str(e)}")
-            return jsonify({'response': "I apologize, but I encountered an issue processing your message. Could you please try rephrasing? You can ask me about properties, prices, investments, or home loans!"})
 
     @app.route('/api/favorite/<int:property_id>', methods=['POST'])
     @login_required
@@ -642,101 +601,65 @@ def create_app():
         """About page"""
         return render_template('about.html')
 
-    @app.route('/chatbot', methods=['GET', 'POST'])
-    def chatbot_page():
-        """Chatbot full page - pure Python, no JavaScript"""
-        import re
+    # ==================== AI PRICE PREDICTION ====================
 
-        # Initialize chat history in session
-        if 'chat_history' not in session:
-            session['chat_history'] = []
+    @app.route('/predict', methods=['GET', 'POST'])
+    def predict_price():
+        """AI Price Prediction page"""
+        prediction = None
+        form_data = None
 
-        # Handle form POST
         if request.method == 'POST':
-            user_message = request.form.get('message', '').strip()
-            if user_message:
-                # Get bot response
-                try:
-                    user_id = current_user.id if current_user.is_authenticated else None
-                except Exception:
-                    user_id = None
+            # Get form data
+            city = request.form.get('city', '').strip()
+            state = request.form.get('state', '').strip()
+            property_type = request.form.get('property_type', '').strip()
+            area_sqft = request.form.get('area_sqft', 0, type=int)
+            bhk = request.form.get('bhk', 2, type=int)
+            floor = request.form.get('floor', 0, type=int)
+            total_floors = request.form.get('total_floors', 1, type=int)
+            furnishing = request.form.get('furnishing', 'Unfurnished').strip()
+            possession = request.form.get('possession', 'Ready to Move').strip()
+            age_years = request.form.get('age_years', 0, type=int)
+            amenities = request.form.getlist('amenities')
 
-                try:
-                    bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
-                except Exception as e:
-                    bot_response = "I apologize, I encountered an issue. Please try rephrasing your question!"
+            # Save form data for re-display
+            form_data = {
+                'city': city,
+                'state': state,
+                'property_type': property_type,
+                'area_sqft': area_sqft,
+                'bhk': str(bhk),
+                'floor': floor,
+                'total_floors': total_floors,
+                'furnishing': furnishing,
+                'possession': possession,
+                'age_years': age_years,
+                'amenities': amenities,
+            }
 
-                # Format response for HTML display
-                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', bot_response)
-                formatted_response = formatted_response.replace('\n', '<br>')
+            if city and property_type and area_sqft > 0:
+                prediction = predictor.predict(
+                    city=city,
+                    state=state,
+                    property_type=property_type,
+                    area_sqft=area_sqft,
+                    bhk=bhk,
+                    floor=floor,
+                    total_floors=total_floors,
+                    furnishing=furnishing,
+                    possession=possession,
+                    amenities=amenities,
+                    age_years=age_years,
+                )
+            else:
+                flash('Please fill in City, Property Type, and Area.', 'error')
 
-                # Get current history, append, save back
-                history = list(session.get('chat_history', []))
-                history.append({'role': 'user', 'content': user_message})
-                history.append({'role': 'bot', 'content': formatted_response})
-
-                # Keep only last 20 messages
-                if len(history) > 20:
-                    history = history[-20:]
-
-                session['chat_history'] = history
-                session.modified = True
-
-                # Save to DB if logged in
-                try:
-                    if current_user.is_authenticated:
-                        from models import ChatMessage
-                        chat_msg = ChatMessage(
-                            user_id=current_user.id,
-                            message=user_message,
-                            response=bot_response
-                        )
-                        db.session.add(chat_msg)
-                        db.session.commit()
-                except Exception:
-                    pass
-
-            return redirect(url_for('chatbot_page'))
-
-        # Handle suggestion chip clicks (GET with query param)
-        if request.args.get('message'):
-            user_message = request.args.get('message', '').strip()
-            if user_message:
-                try:
-                    user_id = current_user.id if current_user.is_authenticated else None
-                except Exception:
-                    user_id = None
-
-                try:
-                    bot_response = chatbot.get_response(user_message, db_session=db.session, user_id=user_id)
-                except Exception:
-                    bot_response = "I apologize, I encountered an issue. Please try rephrasing your question!"
-
-                formatted_response = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', bot_response)
-                formatted_response = formatted_response.replace('\n', '<br>')
-
-                history = list(session.get('chat_history', []))
-                history.append({'role': 'user', 'content': user_message})
-                history.append({'role': 'bot', 'content': formatted_response})
-
-                if len(history) > 20:
-                    history = history[-20:]
-
-                session['chat_history'] = history
-                session.modified = True
-
-                return redirect(url_for('chatbot_page'))
-
-        chat_history = session.get('chat_history', [])
-        return render_template('chatbot.html',
-                               chat_history=chat_history,
-                               prefill_message='')
-
-    @app.route('/chatbot/clear')
-    def chatbot_clear():
-        """Clear chat history"""
-        session.pop('chat_history', None)
-        return redirect(url_for('chatbot_page'))
+        states = sorted(STATES_CITIES.keys())
+        return render_template('predict.html',
+                               prediction=prediction,
+                               form_data=form_data,
+                               states=states)
 
     # ==================== ERROR HANDLERS ====================
 

@@ -22,7 +22,7 @@
                 <li><a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="{{ url_for('search') }}" class="nav-link"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="{{ url_for('states_list') }}" class="nav-link"><i class="fas fa-map-marked-alt"></i> States</a></li>
-                <li><a href="{{ url_for('chatbot_page') }}" class="nav-link"><i class="fas fa-robot"></i> AI Chat</a></li>
+                <li><a href="{{ url_for('predict_price') }}" class="nav-link"><i class="fas fa-brain"></i> AI Predict</a></li>
                 <li><a href="{{ url_for('contact') }}" class="nav-link"><i class="fas fa-envelope"></i> Contact</a></li>
             </ul>
 
@@ -87,7 +87,7 @@
                         <li><a href="{{ url_for('home') }}">Home</a></li>
                         <li><a href="{{ url_for('search') }}">Search Properties</a></li>
                         <li><a href="{{ url_for('states_list') }}">Browse States</a></li>
-                        <li><a href="{{ url_for('chatbot_page') }}">AI Assistant</a></li>
+                        <li><a href="{{ url_for('predict_price') }}">AI Price Prediction</a></li>
                         <li><a href="{{ url_for('about') }}">About Us</a></li>
                     </ul>
                 </div>
@@ -116,9 +116,9 @@
         </div>
     </footer>
 
-    <!-- Floating Chat Link (no JS - just a link to chat page) -->
-    <a href="{{ url_for('chatbot_page') }}" class="chat-fab" title="Chat with AI">
-        <i class="fas fa-robot"></i>
+    <!-- Floating Predict Link -->
+    <a href="{{ url_for('predict_price') }}" class="chat-fab" title="AI Price Prediction">
+        <i class="fas fa-brain"></i>
     </a>
 </body>
 </html>
