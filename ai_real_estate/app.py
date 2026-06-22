@@ -694,7 +694,7 @@ def create_app():
             """Get local image path for a property"""
             key = property_image_map.get(property_type, 'apartment')
             img_num = (property_id % 8) + 1
-            return url_for('static', filename=f'images/properties/{key}_{img_num}.png')
+            return url_for('static', filename=f'images/properties/{key}_{img_num}.svg')
 
         return {
             'states_list': sorted(STATES_CITIES.keys()),

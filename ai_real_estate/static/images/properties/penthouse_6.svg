@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#334155"/></linearGradient></defs>
+<rect width="400" height="250" fill="url(#bg)"/>
+<circle cx="200" cy="55" r="45" fill="white" opacity="0.03"/>
+<circle cx="250" cy="215" r="55" fill="white" opacity="0.02"/>
+<rect x="140" y="70" width="120" height="140" rx="4" fill="white" opacity="0.15"/><rect x="145" y="65" width="110" height="10" rx="2" fill="white" opacity="0.2"/><rect x="155" y="85" width="90" height="3" fill="white" opacity="0.1"/><rect x="155" y="95" width="25" height="20" rx="2" fill="white" opacity="0.2"/><rect x="185" y="95" width="25" height="20" rx="2" fill="white" opacity="0.2"/><rect x="220" y="95" width="25" height="20" rx="2" fill="white" opacity="0.2"/><rect x="155" y="125" width="25" height="20" rx="2" fill="white" opacity="0.2"/><rect x="185" y="125" width="25" height="20" rx="2" fill="white" opacity="0.2"/><rect x="220" y="125" width="25" height="20" rx="2" fill="white" opacity="0.2"/><rect x="260" y="130" width="50" height="80" fill="white" opacity="0.08"/>
+</svg>
