@@ -26,6 +26,11 @@
                         <i class="fas fa-city"></i>
                         <select name="city" id="heroCity">
                             <option value="">Select City</option>
+                            {% for state_name, cities in states_cities.items() %}
+                            {% for city in cities %}
+                            <option value="{{ city }}">{{ city }}</option>
+                            {% endfor %}
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="search-field">
